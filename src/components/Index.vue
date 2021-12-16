@@ -25,7 +25,7 @@
             </div>
             <div class="bottom">
               <time class="time">{{ i.sendtime }}</time>
-              <el-button type="text" class="button" :disabled="i.isLiked" :id="'like-btn-card-'+i.id" @click="onLike">点赞 {{ i.likes }}</el-button>
+              <el-button type="text" class="button" :disabled="i.isLiked" :id="'like-btn-card-'+i.id" @click="onLike(i.id)"> <!-- @click="onLike"-->点赞 {{ i.likes }}</el-button>
             </div>
           </el-card>
         </el-col>
@@ -80,8 +80,7 @@ export default defineComponent({
         console.log(data.value)
       })
     }
-    const onLike = (info) => {
-      const id = info.path[1].id.replace('like-btn-card-', '')
+    const onLike = (id) => {
       axios({
         url: "https://bbq.bjbybbs.com/api/like/" + id + "?t=" + (new Date()).getTime(),
         method: "get"

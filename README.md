@@ -1,1 +1,1 @@
-# Confession wall Frontend
+# Declaration Wall Frontend

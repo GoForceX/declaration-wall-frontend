@@ -19,7 +19,7 @@
     </el-header>
     <el-main style="margin-bottom: 40px">
       <el-row :gutter="10">
-        <el-col :span="18" :offset="3">
+        <el-col :xs="{span: 24, offset: 0}" :sm="{span: 22, offset: 1}" :md="{span: 20, offset: 2}" :lg="{span: 18, offset: 3}" :xl="{span: 18, offset: 3}">
           <router-view></router-view>
         </el-col>
       </el-row>
@@ -32,6 +32,7 @@
       </el-row>
     </el-footer>
   </el-container>
+  <el-backtop />
 </template>
 
 <script lang="ts">

@@ -18,11 +18,13 @@
         <el-form-item label="内容" prop="payload">
           <el-input v-model="pubForm.payload" :autosize="{ minRows: 4, maxRows: 10 }" type="textarea"></el-input>
         </el-form-item>
+        <!--
         <el-form-item label="验证码">
           <div id="publish-geetest">
             <div id="captcha" ref="captcha"></div>
           </div>
         </el-form-item>
+        -->
         <el-form-item>
           <el-button type="primary" @click="onSubmit">提交！</el-button>
         </el-form-item>
@@ -40,6 +42,8 @@ import { ElNotification } from "element-plus";
 export default defineComponent ({
   setup() {
     const { proxy } = getCurrentInstance()
+
+    const geetestInstance = ref({});
 
     const isCaptchaSuccess = ref(false);
     const challenge = ref("")
@@ -73,6 +77,7 @@ export default defineComponent ({
     })
 
     const onSubmit = () => {
+      /*
       if (!isCaptchaSuccess.value) {
         ElNotification({
           title: '你不对劲',
@@ -80,15 +85,52 @@ export default defineComponent ({
           duration: 5000,
         })
       } else {
-        proxy.$refs['pubFormRef'].validate((valid) => {
-          if (valid) {
-            // api at /api/create/message
+      */
+
+      proxy.$refs['pubFormRef'].validate((valid) => {
+        if (valid) {
+          // api at /api/create/message
+          geetestInstance.value.verify()
+        } else {
+          ElNotification({
+            title: '校验失败',
+            message: '你甚至没有填上必填的选项（',
+            duration: 5000,
+            type: 'error',
+          })
+        }
+      })
+      // }
+    }
+
+    onMounted(() => {
+      axios({
+        url: "https://verify.bjbybbs.com/register" + "?t=" + (new Date()).getTime(),
+        method: "get"
+      }).then(function (data) {
+        data = data.data
+        //请检测data的数据结构， 保证data.gt, data.challenge, data.success有值
+        initGeetest({
+          // 以下配置参数来自服务端 SDK
+          https: true,
+          product: "bind",
+          gt: data.gt,
+          challenge: data.challenge,
+          offline: !data.success,
+          new_captcha: true
+        }, function (captchaObj) {
+          geetestInstance.value = captchaObj
+          // captchaObj.appendTo("#captcha");
+          captchaObj.onSuccess(function () {
+            isCaptchaSuccess.value = true;
+            const result = captchaObj.getValidate();
+
             let data = {
               "name": pubForm.value.name,
               "target": pubForm.value.target,
               "payload": pubForm.value.payload,
-              "challenge": challenge.value,
-              "validate": validate.value
+              "challenge": result.geetest_challenge,
+              "validate": result.geetest_validate
             };
             axios.post('https://bbq.bjbybbs.com/api/create/message', data)
                 .then(res => {
@@ -108,47 +150,9 @@ export default defineComponent ({
                     })
                   }
                 })
-          } else {
-            ElNotification({
-              title: '校验失败',
-              message: '你甚至没有填上必填的选项（',
-              duration: 5000,
-              type: 'error',
-            })
-          }
-        })
-
-      }
-    }
-
-    onMounted(() => {
-      axios({
-        url: "https://verify.bjbybbs.com/register" + "?t=" + (new Date()).getTime(),
-        method: "get"
-      }).then(function (data) {
-        data = data.data
-        //请检测data的数据结构， 保证data.gt, data.challenge, data.success有值
-        initGeetest({
-          // 以下配置参数来自服务端 SDK
-          https: true,
-          gt: data.gt,
-          challenge: data.challenge,
-          offline: !data.success,
-          new_captcha: true
-        }, function (captchaObj) {
-          captchaObj.appendTo("#captcha");
-          captchaObj.onSuccess(function () {
-            isCaptchaSuccess.value = true;
-            const result = captchaObj.getValidate();
-            challenge.value = result.geetest_challenge;
-            validate.value = result.geetest_validate;
           })
         })
       })
-    })
-
-    onBeforeUnmount(() => {
-      proxy.$refs['captcha'].innerHTML = ''
     })
 
     return {
