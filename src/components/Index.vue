@@ -4,7 +4,7 @@
     <el-main>
       <el-alert
           title="站长的小贴士"
-          description="你好！欢迎来支持我们的表白墙，目前表白墙仍在不断更新中，如有bug，敬请谅解。"
+          :description="'你好！欢迎来支持我们的表白墙，目前表白墙仍在不断更新中，如有bug，敬请谅解。目前版本：0.2.0'"
           type="warning"
           effect="dark"
           :closable="true"
@@ -20,7 +20,7 @@
                 <span style="color: #999; font-size: 13px">No. {{ i.id }}</span>
               </div>
             </template>
-            <div class="card-content">
+            <div class="card-content" @click="onCardClick(i.id)">
               <div>{{ i.payload }}</div>
             </div>
             <div class="bottom">
@@ -39,12 +39,14 @@
 import { defineComponent, ref } from 'vue'
 import axios from "axios";
 import {ElNotification} from "element-plus/es";
+import {useRouter} from "vue-router";
 
 export default defineComponent({
   setup() {
     if (localStorage.getItem("liked-list") == null) {
       localStorage.setItem("liked-list", JSON.stringify([]))
     }
+    const router = useRouter()
     const likedList = ref(JSON.parse(localStorage.getItem("liked-list")))
     // api at /api/list/{page}
     const page_num = ref(1)
@@ -56,7 +58,6 @@ export default defineComponent({
         method: "get"
       }).then(function (respdata) {
         respdata = respdata.data
-        console.log(respdata)
         if (respdata.code == 0) {
           respdata.response.forEach((card) => {
             card.sendtime = new Date(parseInt(card.sendtime) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ')
@@ -70,14 +71,12 @@ export default defineComponent({
               card.isLiked = likedList.value[card.id]
             }
             data.value.push(card)
-            console.log(card)
           })
           if (respdata.response.length < 10) {
             isDisabled.value = false
           }
           page_num.value += 1
         }
-        console.log(data.value)
       })
     }
     const onLike = (id) => {
@@ -86,7 +85,6 @@ export default defineComponent({
         method: "get"
       }).then(function (respdata) {
         respdata = respdata.data
-        console.log(respdata)
         if (respdata.code == 0) {
           const choosed = data.value.find(item => item.id == id)
           choosed.likes += 1
@@ -103,11 +101,15 @@ export default defineComponent({
         }
       })
     }
+    const onCardClick = (id) => {
+      router.push('/card/' + id)
+    }
     return {
       page_num,
       data,
       isDisabled,
       onLike,
+      onCardClick,
       load,
     }
   },

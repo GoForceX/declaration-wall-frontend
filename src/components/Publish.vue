@@ -36,7 +36,7 @@
 
 <script type="ts">
 import axios from 'axios'
-import {defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, ref} from "vue";
+import {defineComponent, getCurrentInstance, onMounted, ref} from "vue";
 import { ElNotification } from "element-plus";
 
 export default defineComponent ({
@@ -46,8 +46,6 @@ export default defineComponent ({
     const geetestInstance = ref({});
 
     const isCaptchaSuccess = ref(false);
-    const challenge = ref("")
-    const validate = ref("")
     const pubForm = ref({
       name: '',
       target: '',
