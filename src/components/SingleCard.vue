@@ -4,7 +4,7 @@
     <el-main>
       <el-alert
           title="站长的小贴士"
-          description="你好！欢迎来支持我们的表白墙，目前表白墙仍在不断更新中，如有bug，敬请谅解。"
+          :description="'你好！欢迎来支持我们的表白墙，目前表白墙仍在不断更新中，如有bug，敬请谅解。\n目前版本：0.2.1'"
           type="warning"
           effect="dark"
           :closable="true"
@@ -21,7 +21,9 @@
               </div>
             </template>
             <div class="card-content">
-              <div style="font-size: 20px; margin: auto;">『 {{ payload }} 』</div>
+              <div style="font-size: 20px; margin: auto; position: relative; width: 100%; word-break: keep-all">
+                {{ payload }}
+              </div>
             </div>
             <div class="bottom">
               <time class="time">{{ sendtime }}</time>
@@ -75,10 +77,11 @@
             <div class="comment-content">
               <el-row>
                 <el-space class="el-col-24" direction="vertical" size="mini" :spacer="spacer" alignment="start">
+                  <span v-if="comments.length === 0">还没有评论呢，<br>你要成为第一个吗？</span>
                   <el-col :span="24" v-for="comment in comments" style="align-items: start">
                     <div class="comment">
                       <div style="font-size: var(--el-font-size-large);">{{ comment.sender }}</div>
-                      <div style="font-size: var(--el-font-size-medium); color: #999">{{ comment.payload }}</div>
+                      <div style="font-size: var(--el-font-size-medium); color: #999; white-space: pre-wrap">{{ comment.payload }}</div>
                       <div class="footer time">
                         <span>No.{{ comment.id }}</span>
                         <time>{{ comment.sendtime }}</time>
@@ -171,6 +174,9 @@ export default defineComponent ({
             isLiked.value = false
           } else {
             isLiked.value = likedList.value[id]
+          }
+          if (resp.sender == "") {
+            resp.sender = "匿名"
           }
           sender.value = resp.sender
           target.value = resp.target
@@ -358,6 +364,7 @@ export default defineComponent ({
   color: #f56c6c;
   min-height: 300px;
   text-align: center;
+  white-space: pre-wrap;
 }
 
 .el-space :deep(span) > .el-divider {
@@ -386,10 +393,14 @@ export default defineComponent ({
 }
 
 .comment > div {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   &:last-child {
     margin-bottom: 0;
   }
+}
+
+.el-alert {
+  white-space: pre-wrap;
 }
 
 </style>
